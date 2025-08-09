@@ -206,7 +206,7 @@ def plot_mean_frequency(
 
 def main():
     # capture_movie()
-    # capture_frames()
+    capture_frames()
     plot_mean_frequency()
 
 #%%
