@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 *.png
 *.mp4
+/outputs

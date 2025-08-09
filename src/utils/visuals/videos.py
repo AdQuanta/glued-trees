@@ -1,5 +1,5 @@
 # `matplotlib` and `moviepy`` stuff
-from moviepy.editor import ImageClip, concatenate_videoclips
+from moviepy import ImageClip, concatenate_videoclips
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 

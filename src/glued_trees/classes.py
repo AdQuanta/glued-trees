@@ -10,18 +10,10 @@ from tqdm import tqdm
 
 from qutip import basis, Qobj, sesolve, Result
 
-# Initialize logger
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Initialize RNG seed for reproducibility
-rng = np.random.default_rng(0)
-
-
-
 
 class GluedTrees:
-    def __init__(self, h: int, J: float):
+    def __init__(self, h: int, J: float, rng:np.random.Generator|int=0):
+        self.rng : np.random.Generator = _parse_rng(rng)
         self.h = h  # Tree height
         self.J = J  # Interaction strength
         self.T, self.T1, self.T2 = self.construct_glued_trees_graph()
@@ -54,6 +46,8 @@ class GluedTrees:
         return {**pos_T1, **pos_T2}
 
     def construct_glued_trees_graph(self) -> tuple[nx.Graph, nx.Graph, nx.Graph]:
+        rng = self.rng
+
         # Create a union of two binary trees
         T1 = nx.balanced_tree(2, self.h)
         N_tree = len(T1)
@@ -123,43 +117,29 @@ class GluedTrees:
         psi[start_idx:end_idx] = 1 / np.sqrt(end_idx - start_idx)
         return psi
 
-    def time_evolution(self, tmax: float, dt: float, psi0: np.ndarray|None = None) -> Result:
+    def time_evolution(self, tmax: float, dt: float, psi0: np.ndarray|None = None, prog_bar:bool=True) -> Result:
         if psi0 is None:
             # Single-excitation at the entrance root node
             psi0_qt = basis(self.N, 0)
         else:
             psi0_qt = Qobj(psi0)
         H_qt = Qobj(self.get_hamiltonian())
-        res = sesolve(H_qt, psi0_qt, tlist=np.arange(0, tmax, dt), options={"progress_bar": "tqdm"})
 
+        if prog_bar:
+            options={"progress_bar": "tqdm"}
+        else:
+            options={}
+
+        res = sesolve(H_qt, psi0_qt, tlist=np.arange(0, tmax, dt), options=options)
         return res
 
     def plot_graph_on_ax(self, ax, node_vals: np.ndarray|None = None):
+        # Get positions (cached property):
         pos = self.node_positions  # first access computes, then cached
-
-        if node_vals is not None:
-            node_color = np.angle(node_vals / node_vals[0])
-            alphas = np.minimum(1, 0.25 * np.abs(node_vals) ** 2 * self.N)
-            ## Draw each node individually to support per-node alpha
-            for i, (node, (x, y)) in enumerate(pos.items()):
-                alpha = alphas[i]
-                if alpha < 0.01:
-                    ax.scatter(
-                        x, y, s=10, c='black', edgecolors="black", alpha=0.3
-                    )
-                else:
-                    ax.scatter(
-                        x, y,
-                        s=100,
-                        c=[node_color[i]],
-                        vmin=-np.pi, vmax=np.pi,
-                        cmap="hsv",
-                        alpha=alpha,
-                        edgecolors="black"
-                    )
-        else:
-            nx.draw_networkx_nodes(self.T, pos, ax=ax, node_size=50, node_color="skyblue", edgecolors="black")
+        # Draw the basics:
         nx.draw_networkx_edges(self.T, pos, ax=ax, alpha=0.2)
+        nx.draw_networkx_nodes(self.T, pos, ax=ax, node_size=1, node_color="black", edgecolors="black", alpha=0.2)
+
 
     def plot_spectrum(self):
         # in-fucntion import. no need for speed, but we don't want to require matplotlib if no-one uses it
@@ -191,13 +171,14 @@ class GluedTrees:
 
 
 class GluedTreesDisorder(GluedTrees):
-    def __init__(self, h: int, J: float, sigma: float, distribution: str):
-        super().__init__(h, J)
+    def __init__(self, h: int, J: float, sigma: float, distribution: str, rng: np.random.Generator|int=0):
+        super().__init__(h, J, rng=rng)
         self.sigma = sigma
         self.distribution = distribution
         self.omegas = self._generate_disorder(sigma, distribution)
 
     def _generate_disorder(self, sigma: float, distribution: str) -> np.ndarray:
+        rng = self.rng
         if distribution == "uniform":
             bw = np.sqrt(3) * sigma
             omegas = rng.uniform(-bw, bw, self.N)
@@ -257,17 +238,29 @@ class GluedTreesAllToAll(GluedTreesDisorder):
 
 
 class GluedTreesSmallWorld(GluedTreesDisorder):
-    def __init__(self, h: int, J: float, p: float, nn: bool, sigma: float, distribution: str):
-        super().__init__(h, J, sigma, distribution)
+    def __init__(
+        self, 
+        h: int,    # Tree height
+        J: float,  # Interaction strength
+        p: float,  #
+        nn: bool, 
+        sigma: float, 
+        distribution: str,
+        rng: np.random.Generator|int=0,
+    ):
+        super().__init__(h, J, sigma, distribution, rng=rng)
         self.p = p
         self.nn = nn
         self.Tsw = self.construct_small_world_graph()
 
     def construct_small_world_graph(self) -> nx.Graph:
+        rng = self.rng
+
         Tsw = self.T.copy()
         nx.set_edge_attributes(Tsw, self.J, "weight")
-
-        for layer_idx in range(1, 2 * self.h + 1):
+        
+        layers_without_entrance_and_exit = range(1, self.num_layers-1)
+        for layer_idx in layers_without_entrance_and_exit:
             start_idx, end_idx = self._layer_indices(layer_idx)
 
             # Add nearest-neighbor connections
@@ -292,7 +285,17 @@ class GluedTreesSmallWorld(GluedTreesDisorder):
         Get the parameters of the model.
         """
         d : dict= super().parameters
-        d['P'] = self.p
+        d['p'] = self.p
         d['nn'] = self.nn
         d['Tsw'] = self.Tsw
         return d
+
+
+
+def _parse_rng(rng: np.random.Generator|int) -> np.random.Generator:
+    if isinstance(rng, int):
+        return np.random.default_rng(rng)
+    elif isinstance(rng, np.random.Generator):
+        return rng
+    else:
+        raise TypeError("rng must be an int or a numpy random Generator.")

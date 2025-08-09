@@ -7,3 +7,5 @@ from matplotlib.quiver import Quiver
 from matplotlib.text import Text
 from matplotlib.legend import Legend
 from matplotlib.ticker import ScalarFormatter
+from matplotlib.artist import Artist
+from matplotlib.colorbar import ColorbarBase, Colorbar
