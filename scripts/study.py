@@ -65,7 +65,7 @@ def _capture_frame(
 ) -> Figure:
     
     ## Compute glued-trees state:
-    gt = GluedTreesSmallWorld(h, J, p, False, sigma, distribution="gaussian")
+    gt = GluedTreesSmallWorld(h, J, J2, p, False, sigma, distribution="gaussian")
     res = full_analysis(gt, max_t=max_time, dt=dt)
     data = full_movie_figure_frame_at_time(res, t="Final")
 
@@ -148,7 +148,7 @@ def _extract_results(
     dt=0.05,           # Time step for the simulation
     rng:int = 0
 ):
-    gt = GluedTreesSmallWorld(h, J, p, False, sigma, distribution="gaussian", rng=rng)
+    gt = GluedTreesSmallWorld(h, J, J2, p, False, sigma, distribution="gaussian", rng=rng)
     res = full_analysis(gt, max_t=max_time, dt=dt, prog_bar=False)
     freq_vect, freq_response = res.exit_probability_fourier_transform()
     center_frequency = _compute_center_frequency(freq_vect, freq_response)
@@ -168,7 +168,6 @@ def plot_mean_frequency(
     num_repats:int = num_repats
 
 ):
-    
 
     freq_x_y_values_dict : dict[float, list[float]] = {}
     prob_x_y_values_dict : dict[float, list[float]] = {}
@@ -207,7 +206,7 @@ def plot_mean_frequency(
 def main():
     # capture_movie()
     capture_frames()
-    plot_mean_frequency()
+    # plot_mean_frequency()
 
 #%%
 

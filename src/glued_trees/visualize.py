@@ -101,6 +101,8 @@ def plot_layer_distribution_board(
     up_to_time:float|None = None,
     flip_y_axis:bool = True,
     ax:Axes|None = None, # Optional: pass an existing axis to plot on
+    color_scheme : Literal["Dark-mode", "Light-mode"] = "Dark-mode",
+    colorbar: Axes|Literal["Add", False] = False  # Optional: add colorbar showing probability scale
 ) -> Axes:
     
     gt = res.glued_trees
@@ -147,10 +149,32 @@ def plot_layer_distribution_board(
         ax=ax
     )
 
+    ## colors:
+    match color_scheme:
+        case "Dark-mode":
+            cmap = "inferno"
+        case "Light-mode":
+            cmap = "Blues"
+
     ## use the mesh Z to create a board:
-    ax.pcolormesh(X, Y, Z, shading='flat', cmap='inferno', alpha=1, vmin=0, vmax=1)
+    mesh = ax.pcolormesh(X, Y, Z, shading='flat', cmap=cmap, alpha=1, vmin=0, vmax=1)
     ax.set_xlabel("time")
     ax.set_ylabel("layer")
+
+    ## Add colorbar if requested:
+    if colorbar is not False:
+        if isinstance(colorbar, Axes):
+            # use the existing axes as a global colorbar:
+            cbar = colorbar
+            # Update according to mesh:
+            plt.colorbar(mesh, ax=cbar, pad=0.02)
+        elif isinstance(colorbar, str) and colorbar == "Add":
+            cbar = ax.figure.colorbar(mesh, ax=ax, pad=0.02)
+
+        cbar.set_label("Probability")
+        # Optional: set specific ticks for probability scale
+        cbar.set_ticks([0, 0.5, 1.0])
+        cbar.set_ticklabels(['0', '0.5', '1.0'])
 
     ## Update the x-ticks:
     old_xticks = ax.get_xticks()

@@ -29,29 +29,57 @@ from matplotlib.axes import Axes
 def single_subplot(
     *,
     J = -1.0,        # Coupling strength   # -1.0 it first attemps
-    J2 = -10_000,    # All-to-all coupling strength
+    J2 = -100,       # All-to-all coupling strength
     h = 5,           # Tree height
     p = 1,           # Small-world connection probability
-    max_time=1000,   # Maximum time for the simulation
+    max_time=100,    # Maximum time for the simulation
     dt=0.1,          # Time step for the simulation
     sigma = 1.0,     # Disorder strength
     ax:Axes
 ) -> Figure:
     
     ## Compute glued-trees state:
-    gt = GluedTreesSmallWorld(h, J, p, False, sigma, distribution="gaussian")
+    gt = GluedTreesSmallWorld(h, J, J2, p, False, sigma, distribution="gaussian")
     res = full_analysis(gt, max_t=max_time, dt=dt)
-    plot_layer_distribution_board(res, ax=ax)
+    plot_layer_distribution_board(res, ax=ax, color_scheme="Light-mode", colorbar="Add")
 
 
-def main():
+def _pretty_figure(
+    fig:Figure, 
+    axes:list[Axes],
+    sigma_values: list[float]
+) -> None:
+    fig.suptitle("Layer Distribution for Different Disorder Strengths")
+    ## remove x-axis lables and ticks for top 2 axes:
+    for ax in axes[:-1]:
+        ax.set_xlabel("")
+        ax.set_xticks([])
+
+    ## Put the sigma values in the right side of the subplots:
+    for ax, sigma in zip(axes, sigma_values):
+        ax.text(-0.22, 0.5, f"$\\sigma={sigma}$", transform=ax.transAxes, fontsize=12,
+                verticalalignment="center")
+
+    ## Finally:
+    fig.tight_layout()
+
+    print("Done prettying up the figure.")
+
+
+def main(
+    sigma_values: list[float] = [0.1, 1.0, 10.0]
+):
+
     fig, (axes) = plt.subplots(nrows=3, ncols=1) 
-    for i, sigma in enumerate([0.1, 1.0, 10.0]):
+    for i, sigma in enumerate(sigma_values):
         ax = axes[i]
         single_subplot(sigma=sigma, ax=ax)
+    
+    _pretty_figure(fig, axes, sigma_values)
 
     draw_now()
     save_figure(fig, file_name="layer_distribution", extensions=["png", "pdf"])
+
 
 if __name__ == "__main__":
     main()
