@@ -6,6 +6,8 @@ import logging
 
 import networkx as nx
 import numpy as np
+from scipy.sparse import diags
+from scipy.sparse.linalg import eigsh
 from tqdm import tqdm
 
 from qutip import basis, Qobj, sesolve, Result
@@ -70,8 +72,9 @@ class GluedTrees:
 
         return T, T1, T2
 
-    def get_hamiltonian(self) -> np.ndarray:
-        return self.J * nx.adjacency_matrix(self.T).toarray()
+    def get_hamiltonian(self, sparse=False) -> np.array:
+        H = self.J * nx.laplacian_matrix(self.T)
+        return H if sparse else H.toarray()
 
     def compute_spectrum(self) -> tuple[np.ndarray, np.ndarray]:
         [E, v] = np.linalg.eigh(self.get_hamiltonian())
@@ -160,12 +163,12 @@ class GluedTrees:
         Get the parameters of the model.
         """
         d : dict= {
-            'h': self.h,
-            'J': self.J,
-            'T': self.T,
-            'T1': self.T1,
-            'T2': self.T2,
-            'N': self.N
+            "h": self.h,
+            "J": self.J,
+            "T": self.T,
+            "T1": self.T1,
+            "T2": self.T2,
+            "N": self.N
         }
         return d
 
@@ -191,8 +194,12 @@ class GluedTreesDisorder(GluedTrees):
 
         return omegas
 
-    def get_hamiltonian(self) -> np.ndarray:
-        return self.J * nx.adjacency_matrix(self.T).toarray() + np.diag(self.omegas)
+    def get_hamiltonian(self, sparse=False) -> np.array:
+        H_lap = self.J * nx.laplacian_matrix(self.T)
+        if sparse:
+            return H_lap + diags(self.omegas)
+        else:
+            return H_lap.toarray() + np.diag(self.omegas)
     
     @property
     def parameters(self) -> dict[str, Any]:
@@ -200,15 +207,15 @@ class GluedTreesDisorder(GluedTrees):
         Get the parameters of the model.
         """
         d : dict= super().parameters
-        d['sigma'] = self.sigma
-        d['distribution'] = self.distribution
-        d['omegas'] = self.omegas
+        d["sigma"] = self.sigma
+        d["distribution"] = self.distribution
+        d["omegas"] = self.omegas
         return d
 
 
 class GluedTreesAllToAll(GluedTreesDisorder):
-    def __init__(self, h: int, J: float, J2: float, sigma: float, distribution: str):
-        super().__init__(h, J, sigma, distribution)
+    def __init__(self, h: int, J: float, J2: float, sigma: float, distribution: str, rng: np.random.Generator|int=0):
+        super().__init__(h, J, sigma, distribution, rng=rng)
         self.J2 = J2
         self.Taa = self.construct_all_to_all_graph()
 
@@ -219,22 +226,17 @@ class GluedTreesAllToAll(GluedTreesDisorder):
         # Add all-to-all connections between nodes in the same layer
         for layer_idx in range(2 * (self.h + 1)):
             start_idx, end_idx = self._layer_indices(layer_idx)
-            w = self.J2
-            if 0 < layer_idx <= self.h:
-                w /= 2 ** layer_idx - 1
-            elif self.h < layer_idx < 2 * self.h + 1:
-                w /= 2 ** (2 * self.h + 1 - layer_idx) - 1
             for u, v in itertools.combinations(range(start_idx, end_idx), 2):
-                Taa.add_edge(u, v, weight=w)
-
-        # Add self edges at the boundaries
-        Taa.add_edge(0, 0, weight=self.J2)
-        Taa.add_edge(self.N - 1, self.N - 1, weight=self.J2)
+                Taa.add_edge(u, v, weight=self.J2)
 
         return Taa
 
-    def get_hamiltonian(self) -> np.ndarray:
-        return nx.adjacency_matrix(self.Taa).toarray() + np.diag(self.omegas)
+    def get_hamiltonian(self, sparse=False) -> np.array:
+        H_lap = nx.laplacian_matrix(self.Taa)
+        if sparse:
+            return H_lap + diags(self.omegas)
+        else:
+            return H_lap.toarray() + np.diag(self.omegas)
 
 
 class GluedTreesSmallWorld(GluedTreesDisorder):
@@ -242,7 +244,8 @@ class GluedTreesSmallWorld(GluedTreesDisorder):
         self, 
         h: int,    # Tree height
         J: float,  # Interaction strength
-        p: float,  #
+        J2: float, # Intra-layer interaction strength
+        p: float,  # Small-world rewiring probability
         nn: bool, 
         sigma: float, 
         distribution: str,
@@ -251,6 +254,7 @@ class GluedTreesSmallWorld(GluedTreesDisorder):
         super().__init__(h, J, sigma, distribution, rng=rng)
         self.p = p
         self.nn = nn
+        self.J2 = J2
         self.Tsw = self.construct_small_world_graph()
 
     def construct_small_world_graph(self) -> nx.Graph:
@@ -266,19 +270,23 @@ class GluedTreesSmallWorld(GluedTreesDisorder):
             # Add nearest-neighbor connections
             if self.nn:
                 for u in range(start_idx, end_idx - 1):
-                    Tsw.add_edge(u, u + 1, weight=self.J)
+                    Tsw.add_edge(u, u + 1, weight=self.J2)
 
             # Add small-world connections w. probability p
             layer_edges = np.array(list(itertools.combinations(range(start_idx, end_idx), 2)))
             connection_probs = rng.random(len(layer_edges))
             edges_to_add = layer_edges[connection_probs < self.p]
-            Tsw.add_edges_from(edges_to_add, weight=self.J)
+            Tsw.add_edges_from(edges_to_add, weight=self.J2)
 
         return Tsw
 
-    def get_hamiltonian(self) -> np.ndarray:
-        return nx.laplacian_matrix(self.Tsw).toarray() + np.diag(self.omegas)
-    
+    def get_hamiltonian(self, sparse=False) -> np.ndarray:
+        H_lap = nx.laplacian_matrix(self.Tsw)
+        if sparse:
+            return H_lap + diags(self.omegas)
+        else:
+            return H_lap.toarray() + np.diag(self.omegas)
+
     @property
     def parameters(self) -> dict[str, Any]:
         """
