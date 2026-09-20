@@ -1,0 +1,218 @@
+{
+  "main": {
+    "id": "754e08117237e215",
+    "type": "split",
+    "children": [
+      {
+        "id": "e1367889bc0c44f2",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "99fc5acfba82b742",
+            "type": "leaf",
+            "state": {
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "e3e14743e1343005",
+    "type": "split",
+    "children": [
+      {
+        "id": "d58766f92bdfc5b3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "f913371dd6eae1f7",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "a71307a377022cb2",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "73a47a23ececf940",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "d303a9a60f9058a5",
+    "type": "split",
+    "children": [
+      {
+        "id": "c7e03244260045f4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8be3a2c5174fc04c",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "c5586eadf40f266e",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "3bb9290381ee5ba0",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "115c17ba38a57b73",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "4223c6c3e130e334",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false,
+      "fix-math:Current file": false
+    }
+  },
+  "active": "99fc5acfba82b742",
+  "lastOpenFiles": [
+    "concepts/experimental-models-and-observables.md",
+    "concepts/glued-trees-walk-and-problem-formulation.md",
+    "concepts/symbols-and-conventions.md",
+    "concepts/coherence-protection-mechanisms.md",
+    "literature/organized-literature-map.md",
+    "literature/papers/rudner2020-dxfkqu3t.md",
+    "index.md",
+    "log.md",
+    "literature/experimental-implementations-and-measurement-platforms.md",
+    "literature/foundations-and-claim-architecture.md",
+    "literature/driven-response-and-correlated-material-probes.md",
+    "literature/collective-light-matter-response.md",
+    "literature/nonequilibrium-collective-dynamics.md",
+    "literature/quantum-walks-and-graph-engineering.md",
+    "project/current-implementation-baseline.md",
+    "project/paper-readiness-criteria.md",
+    "literature/coherence-protection-and-collective-sectors.md",
+    "literature/papers/tebbenjohanns2024-42r92hg9.md",
+    "literature/papers/sloan2024-a2zjlm5i.md",
+    "literature/papers/smale2019-mrn2jnmh.md",
+    "literature/papers/suter2016-wag7duiw.md",
+    "literature/papers/mukamel2004-42yx2izq.md",
+    "literature/papers/eckstein2008-5hvv7wqb.md",
+    "concepts/disorder-localization-and-asymptotic-evidence.md",
+    "theory/protected-layer-manifold-theory.md",
+    "literature/papers/farhi1998-pun6tiuf.md",
+    "concepts",
+    "literature/papers",
+    "theory",
+    "literature"
+  ]
+}
