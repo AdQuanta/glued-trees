@@ -1,26 +1,25 @@
 # Current Implementation Baseline
 
-> Sources: Project README, SPEC.md, and implementation snapshot, 2026-09-20
-> Raw: [Project snapshot](../../raw/project/2026-09-20-project-snapshot.md)
+> Sources: implementation and SPEC.md, 2026-09-20
 > Updated: 2026-09-20
 
 ## Overview
 
-The current code is an exploratory numerical baseline. It constructs glued trees, adds static onsite disorder, supports dense all-to-all or probabilistic intra-layer couplings, propagates states with QuTiP, and computes layer and exit distributions. This is a source-code inventory, not verifier-certified model compliance.
+The codebase is an exploratory numerical baseline. It constructs canonical glued-tree backbones, samples quenched onsite disorder, supports dense all-to-all and independently sampled intra-layer controls, propagates states with QuTiP, and computes layer and exit distributions. This is a source-code inventory, not verifier-certified model compliance.
 
 ## Implemented model classes
 
-`GluedTrees` constructs two balanced binary trees and glues the leaf sets using two independently shuffled matchings while rejecting pairwise duplicate assignments. Its Hamiltonian is the NetworkX graph Laplacian multiplied by $J$. The analysis layer supports time evolution, layer populations, exit probability, and a Fourier transform of the exit signal.
+`GluedTrees` constructs two depth-$L$ binary trees and glues their leaf sets with two shuffled perfect matchings while rejecting duplicate assignments. It assigns every backbone edge weight $J_{\rm GT}$. `DisorderedGluedTrees` samples the canonical disorder array, $\epsilon_i\overset{\rm iid}{\sim}U[-W,W]$. `AllToAllGluedTrees` adds weighted complete graphs within layers, while `IndependentEdgeGluedTrees` optionally adds consecutive-index path edges and independently samples remaining intra-layer candidate edges with probability $p$. Every added intra-layer edge has weight $J_{\rm LR}$.
 
-`GluedTreesDisorder` adds diagonal disorder and currently accepts uniform, Gaussian, or Lorentzian sampling. `GluedTreesAllToAll` adds weighted complete graphs within layers. `GluedTreesSmallWorld` can add nearest-neighbor edges plus independently selected intra-layer pairs with probability $p$.
+All models require keyword arguments and expose `graph`, `left_tree`, `right_tree`, and, for protected variants, `protected_graph`. The selected `hamiltonian_convention` is either `"adjacency"`, implementing $-A_J+\operatorname{diag}(\epsilon)$, or `"laplacian"`, implementing $D_J-A_J+\operatorname{diag}(\epsilon)$. The infinite-time layer distribution uses spectral projectors over eigenvalue groups identified by a documented absolute tolerance, avoiding arbitrary-basis dependence in degenerate eigenspaces.
 
 ## Gap to the governing specification
 
-The snapshot does not yet establish the complete model/verifier program required by the specification. In particular, the specification calls for adjacency and Laplacian formulations, the fixed uniform disorder convention, bounded-degree network families, exact or converged infinite-time averages, joint disorder/network ensembles, final gluing ensembles, rigorous asymptotic model comparison, mechanism diagnostics, evidence bundles, and frozen verifiers.
+The implementation does not establish the complete model and verifier program required by the specification. In particular, it does not provide bounded-degree network families, converged disorder/network/gluing ensembles, rigorous asymptotic model comparison, mechanism diagnostics, evidence bundles, or frozen verifiers.
 
-The present probabilistic small-world construction tests every possible intra-layer pair independently and therefore does not itself enforce the specification's hard maximum-added-degree condition. The all-to-all class is explicitly a dense control under the specification. These are implementation facts and scope gaps, not scientific conclusions.
+The independent-edge construction tests every possible intra-layer pair independently and therefore does not enforce the specification's hard maximum-added-degree condition. The all-to-all class is explicitly a dense control. These are implementation facts and scope gaps, not scientific conclusions.
 
-## See Also
+## See also
 
 - [Research Program](research-program.md)
 - [Disorder, Localization, and Asymptotic Evidence](../concepts/disorder-localization-and-asymptotic-evidence.md)

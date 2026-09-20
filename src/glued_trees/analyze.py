@@ -112,6 +112,11 @@ def compute_layer_distribution(gt:GluedTrees, res:TimeEvolutionResultsType) -> l
     return layer_distribution
 
 
+def compute_infinite_time_layer_distribution(gt: GluedTrees) -> NDArray[np.float64]:
+    """Compute the canonical spectral-projector infinite-time layer average."""
+    return gt.infinite_time_average_layer_distribution()
+
+
 def full_analysis(
     gt:GluedTrees,
     max_t:float, 

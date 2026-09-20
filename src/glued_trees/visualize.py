@@ -417,7 +417,10 @@ def _parameters_str(parameters:dict) -> str:
     """
     Convert the parameters to a string for display.
     """
-    params_str = ", ".join([f"{key}: {parameters[key]}" for key in ["h", "J", "p", "sigma"]])
+    displayed_keys = ["L", "J_GT", "J_LR", "p", "add_path_edges", "W"]
+    params_str = ", ".join(
+        f"{key}: {parameters[key]}" for key in displayed_keys if key in parameters
+    )
     return params_str
 
 

@@ -11,10 +11,14 @@
             "id": "99fc5acfba82b742",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "literature/papers/kurucz2011-2iewu8bu.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "kurucz2011-2iewu8bu"
             }
           }
         ]
@@ -184,6 +188,8 @@
   },
   "active": "99fc5acfba82b742",
   "lastOpenFiles": [
+    "project/current-implementation-baseline.md",
+    "literature/papers/diniz2011-jeng5kgv.md",
     "concepts/experimental-models-and-observables.md",
     "concepts/glued-trees-walk-and-problem-formulation.md",
     "concepts/symbols-and-conventions.md",
@@ -198,7 +204,6 @@
     "literature/collective-light-matter-response.md",
     "literature/nonequilibrium-collective-dynamics.md",
     "literature/quantum-walks-and-graph-engineering.md",
-    "project/current-implementation-baseline.md",
     "project/paper-readiness-criteria.md",
     "literature/coherence-protection-and-collective-sectors.md",
     "literature/papers/tebbenjohanns2024-42r92hg9.md",
@@ -209,7 +214,6 @@
     "literature/papers/eckstein2008-5hvv7wqb.md",
     "concepts/disorder-localization-and-asymptotic-evidence.md",
     "theory/protected-layer-manifold-theory.md",
-    "literature/papers/farhi1998-pun6tiuf.md",
     "concepts",
     "literature/papers",
     "theory",
